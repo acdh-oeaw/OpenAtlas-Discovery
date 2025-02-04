@@ -65,7 +65,9 @@
 		"no-descriptions": "No descriptions available."
 	},
 	"EntityPage": {
-		"details": "Details",
+		"showOnMap": "Show on Map",
+		"details": "Further Information",
+		"noType": "No Type",
 		"iiif": "IIIF-Viewer",
 		"images": "Images ({count})",
 		"map": "Map",
@@ -149,8 +151,10 @@
 		"CurrentOrFormerResidency": "Residency"
 	},
 	"Relations": {
+		"Features": "Features",
 		"Artifacts": "Artifacts",
-		"HumanRemains": "Human Remains"
+		"HumanRemains": "Human Remains",
+		"Sources": "Sources"
 	},
 	"SearchForm": {
 		"filter": "Filter",

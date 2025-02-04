@@ -12,7 +12,7 @@ export const useGetEntityFromRoute = () => {
 	);
 
 	const entity = computed(() => {
-		return data.value?.features[0];
+		return queryData.value?.entity?.features[0];
 	});
 
 	const isLoading = computed(() => {

@@ -1,18 +1,36 @@
 <script lang="ts" setup>
-defineProps<{ title: string; relations: Array<NonNullable<EntityFeature["relations"]>[0]> }>();
+const props = defineProps<{
+	title: string;
+	relations: Array<NonNullable<EntityFeature["relations"]>[0]>;
+	showIcon: boolean;
+}>();
+
+const sortedRelations = computed(() => {
+	function hasCenter(geometry: EntityFeature["relations"][0]["geometry"]) {
+		if (geometry.type === "GeometryCollection") {
+			return Boolean(
+				geometry.geometries.find((g) => {
+					return g.shapeType === "centerpoint";
+				}),
+			);
+		}
+		if (geometry.type === "Point") return geometry.shapeType === "centerpoint";
+		return false;
+	}
+	return props.relations.toSorted((b, a) => {
+		return Number(hasCenter(a.geometry)) - Number(hasCenter(b.geometry));
+	});
+});
+const { getUnprefixedId } = useIdPrefix();
 </script>
 
 <template v-if="relations?.length">
 	<div class="space-x-4 px-4"></div>
-	<div class="flex items-center justify-between">
-		<h4 class="text-sm font-semibold">
-			{{ title }} {{ relations.length > 1 ? `(${relations.length})` : "" }}
-		</h4>
-	</div>
-
-	<RelationListEntry v-if="relations[0]" :relation="relations[0]" />
-
-	<template v-for="relation in relations.slice(1)" :key="getUnprefixedId(relation.relationTo)">
-		<RelationListEntry :relation="relation" />
-	</template>
+	<RelationListEntry
+		v-for="relation in relations"
+		:key="getUnprefixedId(relation.relationTo ? relation.relationTo : '')"
+		:relation="relation"
+		:type="title"
+		:show-icon="showIcon"
+	/>
 </template>

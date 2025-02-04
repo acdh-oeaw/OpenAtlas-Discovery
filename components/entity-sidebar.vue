@@ -45,23 +45,26 @@ const updateHandledRelations = (relations: Array<RelationType>) => {
 		<details
 			:class="
 				props.noTableSidebar
-					? 'group z-10 mb-2 mr-2 h-full translate-x-[-25vw] transition-transform duration-300 open:translate-x-0 absolute w-1/4'
-					: 'group z-10 mb-2 mr-2 h-full translate-x-[-25vw] transition-transform duration-300 open:translate-x-0'
+					? 'group grid h-full z-10 mb-2 mr-2 translate-x-[-25vw] transition-transform duration-300 open:translate-x-0 absolute w-1/4'
+					: 'group grid h-full z-10 mb-2 mr-2 translate-x-[-25vw] transition-transform duration-300 open:translate-x-0'
 			"
 			:open="openState"
 		>
-			<Card class="relative h-full overflow-y-scroll">
+			<div
+				class="relative h-full max-h-full overflow-y-auto rounded-lg border bg-card px-6 py-4 text-card-foreground shadow"
+			>
 				<EntityPrimaryDetails :entity="entity" @handled-relations="updateHandledRelations" />
 
 				<slot name="custom-details" />
 				<!-- <component v-if="hasCustomDetails" v-bind:is="entityDetailsDict" bind:entity-data /> -->
 
 				<EntityDetails
+					v-if="entity.relations && entity.relations?.length > 0"
 					:handled-relations="handledRelations"
 					:relations="entity.relations"
-					class="mx-4 mt-16"
+					class="rounded-md border px-4 py-3 text-sm"
 				/>
-			</Card>
+			</div>
 			<summary
 				class="absolute left-full top-1/2 block -translate-x-2 rounded-md bg-[hsl(var(--card))] py-2 pl-1 shadow-md"
 				style="top: calc(50% - 40px)"

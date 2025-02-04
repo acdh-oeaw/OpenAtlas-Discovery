@@ -19,3 +19,28 @@ export interface LinkedPlace extends LinkedPlacesModel {
 }
 
 export type NetworkEntity = components["schemas"]["NetworkVisualisationModel"]["results"];
+
+export type GetLinkedEntitiesResponse = components["schemas"]["EntitiesOutputModel"]["results"];
+
+export type RelationLinkedEntity = LinkedPlacesModel["features"][0];
+export interface ExtendedEntities extends RelationLinkedEntity {
+	relationType?: string;
+	relationTo?: string;
+	relationSystemClass: string;
+	when?: {
+		timespans?: [
+			{
+				end?: {
+					comment?: string;
+					earliest?: string;
+					latest?: string;
+				};
+				start?: {
+					comment?: string;
+					earliest?: string;
+					latest?: string;
+				};
+			},
+		];
+	};
+}

@@ -31,8 +31,8 @@ const datespans = computed(() => {
 			<template v-for="(timespan, index) of datespans" :key="index">
 				<!-- {{timespan.end ? '' : t("TimespansDisplay.start") + ' '}}{{ timespan.start }} {{timespan.start && timespan.end ? '-' : ''}} {{timespan.start ? '' : t("TimespansDisplay.end") + ' '}}{{ timespan.end }} -->
 
-				<dl class="flex grow-0 flex-col items-end">
-					<div v-if="timespan.start != null" class="text-right">
+				<dl class="flex grow-0 flex-col">
+					<div v-if="timespan.start != null" class="text-start">
 						<dt
 							class="mr-2 inline text-xs font-medium uppercase tracking-wider text-muted-foreground"
 						>
@@ -40,7 +40,7 @@ const datespans = computed(() => {
 						</dt>
 						<dd class="inline">{{ timespan.start }}</dd>
 					</div>
-					<div v-if="timespan.end != null" class="text-right">
+					<div v-if="timespan.end != null" class="text-start">
 						<dt
 							class="mr-2 inline text-xs font-medium uppercase tracking-wider text-muted-foreground"
 						>

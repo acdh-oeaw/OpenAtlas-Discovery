@@ -1,8 +1,9 @@
 import { useIdPrefix } from "@/composables/use-id-prefix";
-import type { LinkedPlace, LinkedPlaceFeature } from "@/types/api";
+import type { ExtendedEntities, LinkedPlace, LinkedPlaceFeature } from "@/types/api";
 
 export interface EntityFeature extends LinkedPlaceFeature {
 	properties: LinkedPlaceFeature["properties"] & { _id: string };
+	relations: Array<ExtendedEntities>;
 }
 
 export interface Entity extends LinkedPlace {

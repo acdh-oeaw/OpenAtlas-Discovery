@@ -65,7 +65,9 @@
 		"no-descriptions": "Keine Beschreibungen verfügbar."
 	},
 	"EntityPage": {
-		"details": "Details",
+		"showOnMap": "Auf Karte anzeigen",
+		"details": "Weitere Informationen",
+		"noType": "Kein Typ",
 		"iiif": "IIIF-Ansicht",
 		"images": "Bilder ({count})",
 		"map": "Karte",
@@ -149,8 +151,10 @@
 		"CurrentOrFormerResidency": "Residenz"
 	},
 	"Relations": {
+		"Features": "Features",
 		"Artifacts": "Artefakte",
-		"HumanRemains": "Menschliche Überreste"
+		"HumanRemains": "Menschliche Überreste",
+		"Sources": "Quellen"
 	},
 	"SearchForm": {
 		"filter": "Filter",

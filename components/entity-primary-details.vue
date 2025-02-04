@@ -48,6 +48,7 @@ const customPrimaryDetails = computed(() => {
 const entityPrimaryDetailsDict: Record<string, Component> = {
 	person: CustomPrimaryDetailsActor,
 	group: CustomPrimaryDetailsActor,
+	place: CustomPrimaryDetailsPlace,
 	stratigraphic_unit: CustomPrimaryDetailsPlace,
 	feature: CustomPrimaryDetailsFeature,
 };
@@ -133,51 +134,47 @@ function copyEntity() {
 </script>
 
 <template>
-	<CardHeader>
-		<div class="grid grid-cols-[auto_auto]">
-			<EntitySystemClass :system-class="entity.systemClass" />
-			<div v-if="!isCopied" class="ml-auto">
-				<Button variant="outline" @click="copyEntity">
-					<CopyIcon :size="16" />
-					{{ t("EntitySidebar.copy") }}
-				</Button>
-			</div>
-			<div v-if="isCopied" class="ml-auto">
-				<Button variant="brand" @click="copyEntity">
-					<CheckIcon :size="16" />
-					{{ t("EntitySidebar.copied") }}
-				</Button>
-			</div>
+	<div class="grid grid-cols-[auto_auto]">
+		<EntitySystemClass :system-class="entity.systemClass" />
+		<div v-if="!isCopied" class="ml-auto">
+			<Button variant="outline" @click="copyEntity">
+				<CopyIcon :size="16" />
+				{{ t("EntitySidebar.copy") }}
+			</Button>
 		</div>
-		<PageTitle>{{ entity.properties.title }}</PageTitle>
-		<!-- @ts-expect FIXME: Incorrect information provided by openapi document. -->
-		<EntityAliases
-			v-if="entity.names"
-			:aliases="entity.names as unknown as Array<{ alias: string }>"
-		/>
-		<EntityTimespans :timespans="entity.when?.timespans" />
-	</CardHeader>
-	<CardContent>
-		<div class="grid gap-4">
-			<EntityDescriptions :descriptions="entity?.descriptions ?? []" />
+		<div v-if="isCopied" class="ml-auto">
+			<Button variant="brand" @click="copyEntity">
+				<CheckIcon :size="16" />
+				{{ t("EntitySidebar.copied") }}
+			</Button>
+		</div>
+	</div>
+	<PageTitle>{{ entity.properties.title }}</PageTitle>
+	<!-- @ts-expect FIXME: Incorrect information provided by openapi document. -->
+	<EntityAliases
+		v-if="entity.names"
+		:aliases="entity.names as unknown as Array<{ alias: string }>"
+	/>
+	<EntityTimespans :timespans="entity.when?.timespans" />
+	<div class="grid gap-4">
+		<EntityDescriptions :descriptions="entity?.descriptions ?? []" />
 
-			<!-- Types -->
-			<div class="flex flex-row flex-wrap gap-1">
-				<TypesPopover
-					v-for="type in entity.types"
-					:key="type.identifier ?? type.label ?? 'missing'"
-					:type="type"
-				/>
-			</div>
-
-			<component
-				:is="customPrimaryDetails"
-				v-if="customPrimaryDetails"
-				:entity="entity"
-				@handled-relations="emitHandledRelations"
+		<!-- Types -->
+		<div class="flex flex-row flex-wrap gap-1">
+			<TypesPopover
+				v-for="type in entity.types"
+				:key="type.identifier ?? type.label ?? 'missing'"
+				:type="type"
 			/>
-
-			<EntityImages v-if="images" :images="images" class="overflow-hidden" />
 		</div>
-	</CardContent>
+
+		<EntityImages v-if="images" :images="images" class="overflow-hidden" />
+
+		<component
+			:is="customPrimaryDetails"
+			v-if="customPrimaryDetails"
+			:entity="entity"
+			@handled-relations="emitHandledRelations"
+		/>
+	</div>
 </template>

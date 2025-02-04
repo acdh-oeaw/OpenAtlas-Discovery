@@ -67,7 +67,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/display/{entityId}": {
+    "/display/{fileId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -152,7 +152,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/iiif_manifest/{version}/{entityId}": {
+    "/iiif_manifest/{version}/{fileId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -565,6 +565,7 @@ export interface components {
                 /** Format: nullable */
                 depictions?: {
                     "@id"?: string;
+                    IIIFBasePath?: string;
                     IIIFManifest?: string;
                     creator?: string;
                     license?: string;
@@ -1100,6 +1101,11 @@ export interface components {
         exclude_system_classes: ("acquisition" | "activity" | "administrative_unit" | "appellation" | "artifact" | "bibliography" | "creation" | "edition" | "event" | "external_reference" | "feature" | "file" | "group" | "human_remains" | "move" | "person" | "place" | "production" | "reference_system" | "source" | "source_translation" | "stratigraphic_unit" | "type" | "type_tools")[];
         /** @description Export the entities into either a simple CSV representation or a zip file of CSV's especially designed for network analyses. */
         export: "csv" | "csvNetwork";
+        /**
+         * @description Specific ID of a file entity.
+         * @example 40
+         */
+        fileId: number;
         /** @description Begin results at the given entity id. */
         first: number;
         /**
@@ -1138,7 +1144,9 @@ export interface components {
          *
          *      **Values**
          *
-         *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+         *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+         *
+         *      *Notes*:
          *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
          *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
          *
@@ -1154,7 +1162,29 @@ export interface components {
          *
          *     **Logical operators**
          *
-         *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+         *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+         *
+         *      The following table outlines the supported operations for each field:
+         *
+         *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+         *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+         *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+         *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+         *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+         *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+         *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+         *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+         *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+         *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+         *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+         *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+         *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+         *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+         *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+         *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+         *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+         *
+         *      */
         search: string;
         /** @description Select which keys should not be displayed. This can improve performance */
         show: ("when" | "types" | "relations" | "names" | "links" | "geometry" | "depictions" | "geonames" | "description" | "none")[];
@@ -1255,7 +1285,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -1271,7 +1303,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -1387,10 +1441,10 @@ export interface operations {
             header?: never;
             path: {
                 /**
-                 * @description Specific entity ID
+                 * @description Specific ID of a file entity.
                  * @example 40
                  */
-                entityId: components["parameters"]["entityId"];
+                fileId: components["parameters"]["fileId"];
             };
             cookie?: never;
         };
@@ -1449,7 +1503,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -1465,7 +1521,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -1637,10 +1715,10 @@ export interface operations {
             path: {
                 version: 2;
                 /**
-                 * @description Specific entity ID
+                 * @description Specific ID of a file entity.
                  * @example 40
                  */
-                entityId: components["parameters"]["entityId"];
+                fileId: components["parameters"]["fileId"];
             };
             cookie?: never;
         };
@@ -1697,7 +1775,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -1713,7 +1793,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Show only entities with the given type id or linked to it. */
                 type_id?: components["parameters"]["type_id"];
@@ -1815,7 +1917,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -1831,7 +1935,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -1998,7 +2124,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -2014,7 +2142,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -2125,7 +2275,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -2141,7 +2293,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -2284,7 +2458,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -2300,7 +2476,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -2383,7 +2581,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -2399,7 +2599,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];
@@ -2542,7 +2764,9 @@ export interface operations {
                  *
                  *      **Values**
                  *
-                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.\n *Notes*:
+                 *      Values has to be a list of items. The items can be either a string, an integer or a tuple (see Notes). Strings need to be marked with “” or ‘’, while integers does not allow this.
+                 *
+                 *      *Notes*:
                  *      The category valueTypeID can search for values of a type ID. But it takes one or more two valued Tuple as list entry: (x,y). x is the type id and y is the searched value. This can be an int or a float, e.g: `{"operator":"lesserThan","values":[(3142,543.3)],"logicalOperator":"and"}`
                  *      The date categories (beginFrom, beginTo, endFrom, endTo) only allow *one* value in the **values** field and it has to be formated the following way: YYYY-MM-DD. Month and day values need to filled up with 0, e.g. 800-01-01
                  *
@@ -2558,7 +2782,29 @@ export interface operations {
                  *
                  *     **Logical operators**
                  *
-                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND. */
+                 *     Not mandatory, OR is the default value. Logical operators handles, if the values are treated as OR or AND.
+                 *
+                 *      The following table outlines the supported operations for each field:
+                 *
+                 *     |                  | equal     | notEqual  | like      | greaterThan | greaterThanEqual | lesserThan | lesserThanEqual |
+                 *     |------------------|-----------|-----------|-----------|-------------|------------------|------------|-----------------|
+                 *     | entityName       |     x      |     x      |    x       |             |                  |            |                 |
+                 *     | entityDescription|      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entityAliases    |      x     |      x     |     x      |             |                  |            |                 |
+                 *     | entityCidocClass |      x     |      x     |      x     |             |                  |            |                 |
+                 *     | entitySystemClass|      x     |      x     |     x      |             |                  |            |                 |
+                 *     | typeName         |       x    |      x     |     x      |             |                  |            |                 |
+                 *     | entityID         |       x    |      x     |           |             |                  |            |                 |
+                 *     | typeID           |      x     |       x    |           |             |                  |            |                 |
+                 *     | valueTypeID      |      x     |      x     |           |      x       |    x              |    x        |      x           |
+                 *     | typeIDWithSubs   |      x     |       x    |           |             |                  |            |                 |
+                 *     | relationToID     |      x     |      x     |           |             |                  |            |                 |
+                 *     | beginFrom        |      x     |      x     |           |      x       |        x          |     x       |      x           |
+                 *     | beginTo          |      x     |      x     |           |      x       |          x        |      x      |       x          |
+                 *     | endFrom          |      x     |      x     |           |       x      |         x         |       x     |       x          |
+                 *     | endTo            |      x     |      x     |           |       x      |       x           |       x     |      x           |
+                 *
+                 *      */
                 search?: components["parameters"]["search"];
                 /** @description Begin results at the given entity id. */
                 first?: components["parameters"]["first"];

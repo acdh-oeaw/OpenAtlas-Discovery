@@ -102,6 +102,10 @@ const selection = computed(() => {
 	return route.query.selection;
 });
 
+const detailOnMap = computed(() => {
+	return route.query.detail;
+});
+
 const mode = computed(() => {
 	return route.query.mode;
 });
@@ -169,6 +173,20 @@ watch(data, () => {
 	popover.value = null;
 });
 
+const selectionCoordinates = ref<[number, number] | undefined>(undefined);
+const detailSelectionCoordinates = ref<[number, number] | undefined>(undefined);
+
+function setCoordinates(entity: EntityFeature, coordinates: Ref<[number, number] | undefined>) {
+	if (entity.geometry.type === "GeometryCollection") {
+		coordinates.value = entity.geometry.geometries.find((g) => {
+			return g.type === "Point";
+		})?.coordinates as [number, number] | undefined;
+	}
+
+	if (entity.geometry.type === "Point") {
+		coordinates.value = entity.geometry.coordinates as unknown as [number, number];
+	}
+}
 watchEffect(() => {
 	if (mode.value && selection.value) {
 		const entity = entities.value.find((feature) => {
@@ -177,24 +195,31 @@ watchEffect(() => {
 		});
 
 		if (entity) {
-			let coordinates = null;
-
-			if (entity.geometry.type === "GeometryCollection") {
-				coordinates = entity.geometry.geometries.find((g) => {
-					return g.type === "Point";
-				})?.coordinates as [number, number] | undefined;
-			}
-
-			if (entity.geometry.type === "Point") {
-				coordinates = entity.geometry.coordinates as unknown as [number, number];
-			}
+			setCoordinates(entity, selectionCoordinates);
+			if (selectionCoordinates.value === undefined) return;
 
 			popover.value = {
-				coordinates:
-					coordinates ??
-					(turf.center(createFeatureCollection([entity])).geometry.coordinates as [number, number]),
+				coordinates: selectionCoordinates.value,
 				entities: [entity],
 			};
+
+			if (detailOnMap.value) {
+				const detailEntity = entities.value.find((feature) => {
+					const id = getUnprefixedId(feature["@id"]);
+					return id === detailOnMap.value;
+				});
+
+				// should there be two popups? --> make popups array / more rendered components??
+				if (detailEntity) {
+					setCoordinates(detailEntity, detailSelectionCoordinates);
+					if (detailSelectionCoordinates.value === undefined) return;
+
+					popover.value = {
+						coordinates: detailSelectionCoordinates.value,
+						entities: [detailEntity],
+					};
+				}
+			}
 		}
 	}
 });
@@ -258,6 +283,7 @@ watchEffect(() => {
 				:height="height"
 				:width="width"
 				:has-polygons="show"
+				:current-selection="selectionCoordinates"
 				@layer-click="onLayerClick"
 			>
 				<GeoMapPopup
