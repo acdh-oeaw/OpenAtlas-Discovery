@@ -110,9 +110,14 @@ const mode = computed(() => {
  * because `maplibre-gl` will serialize geojson features when sending them to the webworker.
  */
 const features = computed(() => {
-	return entities.value.map((entity) => {
-		return createGeoJsonFeature(entity);
-	});
+	return entities.value
+		.filter((entity) => {
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- `geometry` is not always present since OA Version 8.10.0
+			return entity.geometry;
+		})
+		.map((entity) => {
+			return createGeoJsonFeature(entity);
+		});
 });
 
 const centerpoints = computed(() => {
